@@ -28,15 +28,18 @@ Before working with Telegram’s API, you need to get your own API ID and hash:
     Clone the repository to your local machine.
     Install the necessary dependencies.
     Configure the script with your Telegram API credentials.
-    Customize scraping settings to target the channels and groups you're interested in.
+    Customize scraping settings to target the channels and groups you're interested in by updating <telegrram_channels.yaml>.
     Run the script to start scraping Telegram hacktivist channels and groups.
 
 ❗Please note that this script should be used responsibly and in compliance with Telegram's terms of service and community guidelines.
 
 
 # Run in docker
-    bulid docker image docker build -t <name-of-the-docker-image> .
-    docker run -e API_ID=<your-api> \
+    1.First, run the create_session.py script with: python create_session.py which will prompt you to provide authorisation code which will be sent to your Telegram app.
+    Once successfully authorised, the snoooper.session file will be created in project root directory. This is the file which will be reused iside the docker container.
+    2.Bulid docker image with: docker build -t <name-of-the-docker-image> .
+    3.Run docker image with: 
+                docker run -e API_ID=<your-api> \
                -e API_HASH=<your-hash> \
                -e PHONE=<your-phone> \
                -e TOKEN=<your-token> \

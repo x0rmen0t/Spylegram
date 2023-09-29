@@ -1,15 +1,17 @@
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, List, Tuple, Union
-from telethon.errors import ChannelPrivateError
+from typing import List, Optional, Tuple, Union
+
 from telethon import TelegramClient
-from telethon.tl.types import MessageEntityTextUrl, PeerChannel, Message, MessageService, MessageEntityUnknown, MessageEntityUrl
+from telethon.errors import ChannelPrivateError
+from telethon.tl.types import (Message, MessageEntityTextUrl,
+                               MessageEntityUnknown, MessageEntityUrl,
+                               MessageService, PeerChannel)
 
-
-import logging
-
-logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format="[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s", level=logging.INFO
+)
 
 TypeMessageEntity = Union[MessageEntityUnknown, MessageEntityUrl]
 
@@ -34,9 +36,11 @@ class MessageData:
     message_fwd_from_channel_link: Optional[str] = None
 
 
-async def get_first_message_date(client: TelegramClient, channel_url: str) -> Union[datetime, str]:
+async def get_first_message_date(
+    client: TelegramClient, channel_url: str
+) -> Union[datetime, str]:
     """We count channel creation date by the 1st service message posted in the channel;
-        If None then we take creation date from channel entity
+    If None then we take creation date from channel entity
     """
     async for message in client.iter_messages(channel_url, reverse=True, limit=1):
         if isinstance(message, MessageService):
@@ -50,7 +54,7 @@ async def get_last_message_id(client: TelegramClient, channel: str) -> int:
         return message.id
 
 
-def get_url(message_entity: Optional[List['TypeMessageEntity']]) -> str:
+def get_url(message_entity: Optional[List["TypeMessageEntity"]]) -> str:
     for entity in message_entity:
         if isinstance(entity, MessageEntityTextUrl):
             return entity.url
@@ -60,7 +64,7 @@ def get_telegram_link(fwd_channel_username: str) -> str:
     return f"https://t.me/{fwd_channel_username}"
 
 
-async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Tuple[str, str] | Tuple[None, None]: # type: ignore
+async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Tuple[str, str] | Tuple[None, None]:  # type: ignore
     if isinstance(message.fwd_from.from_id, PeerChannel):
         try:
             entity = await client.get_entity(message.fwd_from.from_id.channel_id)
@@ -69,7 +73,8 @@ async def get_fwd_channel_username(client: TelegramClient, message: Message) -> 
         except ChannelPrivateError as e:
             logging.warning(
                 "Cant get information about the channel due to access restrictions. Channe might be marked as private",
-                e)
+                e,
+            )
             return None, None
     else:
         return message.fwd_from.from_name, message.fwd_from.from_id
@@ -79,8 +84,13 @@ async def get_message(client: TelegramClient, *args, **kwargs):
     return await client.get_messages(*args, **kwargs)
 
 
-def create_message_data(message: Message, channel_id: int, channel_username: str, fwd_from_channel_username: str,
-                        tg_link: str) -> MessageData:
+def create_message_data(
+    message: Message,
+    channel_id: int,
+    channel_username: str,
+    fwd_from_channel_username: str,
+    tg_link: str,
+) -> MessageData:
     """
     Create a MessageData object from a Telegram message.
 
@@ -103,12 +113,14 @@ def create_message_data(message: Message, channel_id: int, channel_username: str
         message_pinned=message.pinned,
         message_fwd_from=bool(message.fwd_from),
         message_fwd_from_date=message.fwd_from.date if message.fwd_from else None,
-        message_fwd_from_channel_id=message.fwd_from.from_id.channel_id if message.fwd_from and message.fwd_from.from_id else None,
+        message_fwd_from_channel_id=message.fwd_from.from_id.channel_id
+        if message.fwd_from and message.fwd_from.from_id
+        else None,
         message_fwd_from_channel_username=fwd_from_channel_username,
         message_edit_date=message.edit_date if message.edit_date else None,
         message_views=message.views,
         message_forwards=message.forwards,
         message_media=bool(message.media),
         url_in_message=get_url(message.entities) if message.entities else None,
-        message_fwd_from_channel_link=tg_link if message.fwd_from else None
+        message_fwd_from_channel_link=tg_link if message.fwd_from else None,
     )

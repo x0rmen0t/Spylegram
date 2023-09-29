@@ -1,11 +1,12 @@
 from telethon.tl.types import DocumentAttributeFilename, Message
 from telethon.utils import get_extension
+
 from src.logging_config import logger
 
 
 def read_binary_file(file_path: str) -> bytes | None:
     try:
-        with open(file_path, 'rb') as file:
+        with open(file_path, "rb") as file:
             return file.read()
     except FileNotFoundError as fnf_error:
         logger.error("Error reading file %s" % type(fnf_error).__name__)
@@ -13,14 +14,15 @@ def read_binary_file(file_path: str) -> bytes | None:
 
 
 def callback_photo(current: int, total: int) -> None:
-    #logger.info('Downloaded', current, 'out of', total, 'bytes: {:.2%}'.format(current / total))
+    # logger.info('Downloaded', current, 'out of', total, 'bytes: {:.2%}'.format(current / total))
     percentage = (current / total) * 100
-    logger.info('Downloaded %d out of %d bytes: %.2f%%', current, total, percentage)
+    logger.info("Downloaded %d out of %d bytes: %.2f%%", current, total, percentage)
+
 
 def callback_document(current: int, total: int) -> None:
-    #logger.info('Downloaded', current, 'out of', total, 'bytes: {:.2%}'.format(current / total))
+    # logger.info('Downloaded', current, 'out of', total, 'bytes: {:.2%}'.format(current / total))
     percentage = (current / total) * 100
-    logger.info('Downloaded %d out of %d bytes: %.2f%%', current, total, percentage)
+    logger.info("Downloaded %d out of %d bytes: %.2f%%", current, total, percentage)
 
 
 def get_mime_type(message: Message) -> str:

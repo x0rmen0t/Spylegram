@@ -34,7 +34,7 @@ class MessageData:
     message_fwd_from_channel_link: Optional[str] = None
 
 
-async def get_first_message_date(client: TelegramClient, channel_url: str) -> datetime | str:
+async def get_first_message_date(client: TelegramClient, channel_url: str) -> Union[datetime, str]:
     """We count channel creation date by the 1st service message posted in the channel;
         If None then we take creation date from channel entity
     """
@@ -60,7 +60,7 @@ def get_telegram_link(fwd_channel_username: str) -> str:
     return f"https://t.me/{fwd_channel_username}"
 
 
-async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Tuple[str, str] | Tuple[None, None]:
+async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Tuple[str, str] | Tuple[None, None]: # type: ignore
     if isinstance(message.fwd_from.from_id, PeerChannel):
         try:
             entity = await client.get_entity(message.fwd_from.from_id.channel_id)

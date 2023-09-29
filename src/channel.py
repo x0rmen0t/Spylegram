@@ -1,5 +1,7 @@
 import datetime
 from collections import namedtuple
+from typing import Union
+
 from telethon import TelegramClient, hints
 from src.logging_config import logger
 
@@ -40,7 +42,7 @@ async def get_channel_entity(client: TelegramClient, channel: hints.EntitiesLike
         logger.error("Error occurred when trying to get entity information %s" % type(e).__name__)
 
 
-async def get_channel_username(client: TelegramClient, channel_id: int) -> str | None:
+async def get_channel_username(client: TelegramClient, channel_id: int)-> Union[str, None]:
     try:
         entity = await get_channel_entity(client, channel_id)
         return entity.username

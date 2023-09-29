@@ -34,7 +34,15 @@ Before working with Telegram’s API, you need to get your own API ID and hash:
 ❗Please note that this script should be used responsibly and in compliance with Telegram's terms of service and community guidelines.
 
 
-
+# Run in docker
+    bulid docker image docker build -t <name-of-the-docker-image> .
+    docker run -e API_ID=<your-api> \
+               -e API_HASH=<your-hash> \
+               -e PHONE=<your-phone> \
+               -e TOKEN=<your-token> \
+               -e DB_NAME=<your-db-name> \
+               -v <local-source-path>:/app\
+               -d <name-of-the-docker-image>
 
 
 ## Feedback

@@ -23,7 +23,7 @@ Before working with Telegram’s API, you need to get your own API ID and hash:
     Click on Create application at the end. Remember that your API hash is secret and Telegram won’t let you revoke it. Don’t post it anywhere!
 
 
-## How to Use:
+## How To Use:
 
     Clone the repository to your local machine.
     Install the necessary dependencies.
@@ -34,7 +34,7 @@ Before working with Telegram’s API, you need to get your own API ID and hash:
 ❗Please note that this script should be used responsibly and in compliance with Telegram's terms of service and community guidelines.
 
 
-# Run in docker
+# Run In Docker
     1.First, run the create_session.py script with: python create_session.py which will prompt you to provide authorisation code which will be sent to your Telegram app.
     Once successfully authorised, the snoooper.session file will be created in project root directory. This is the file which will be reused iside the docker container.
     2.Bulid docker image with: docker build -t <name-of-the-docker-image> .
@@ -48,6 +48,10 @@ Before working with Telegram’s API, you need to get your own API ID and hash:
                -d <name-of-the-docker-image>
 
 
-## Feedback
+## Feedback/Contact
 
-If you have any feedback, please reach out to me at ....
+Found a bug or have feedback? Please create an issue on  [issue tracker][bugs].If you'd like to share your thoughts, join
+[mailing list][ml] hosted on Google Groups. If you have ideas for improvements, don't hesitate to submit a pull request! 
+
+[bugs]: https://github.com/x0rmen0t/Spylegram/issues
+[ml]: https://groups.google.com/u/4/g/spylegram

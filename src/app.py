@@ -15,7 +15,7 @@ from src.channel import get_channel_info_rows, get_channel_username
 from src.db import Database
 from src.logging_config import logger
 from src.message import (create_message_data, get_first_message_date,
-                         get_fwd_channel_username, get_message)
+                         get_fwd_channel_username)
 from src.utils import (callback_document, callback_photo, get_document_name,
                        get_mime_type, read_binary_file)
 
@@ -60,7 +60,7 @@ async def process_channel(
         logger.info("Channel %s was found in the db." % tg_channel_name)
     else:
         logger.info(
-            f"Channel %s was not found in the db. Adding channel to the db."
+            "Channel %s was not found in the db. Adding channel to the db."
             % tg_channel_name
         )
         await create_and_save_channel_info(client, channel_url, channel_entity, db)

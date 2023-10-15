@@ -55,9 +55,11 @@ async def get_last_message_id(client: TelegramClient, channel: str) -> int:
 
 
 def get_url(message_entity: Optional[List["TypeMessageEntity"]]) -> str:
+    list_of_entities = []
     for entity in message_entity:
         if isinstance(entity, MessageEntityTextUrl):
-            return entity.url
+            list_of_entities.append( entity.url)
+    return str(list_of_entities)
 
 
 def get_telegram_link(fwd_channel_username: str) -> str:
@@ -72,16 +74,12 @@ async def get_fwd_channel_username(client: TelegramClient, message: Message) -> 
             return entity.username, tg_link
         except ChannelPrivateError as e:
             logging.warning(
-                "Cant get information about the channel due to access restrictions. Channe might be marked as private",
+                "Cant get information about the channel due to access restrictions. Channel might be marked as private",
                 e,
             )
             return None, None
     else:
         return message.fwd_from.from_name, message.fwd_from.from_id
-
-
-async def get_message(client: TelegramClient, *args, **kwargs):
-    return await client.get_messages(*args, **kwargs)
 
 
 def create_message_data(
@@ -109,13 +107,12 @@ def create_message_data(
         channel_id=channel_id,
         channel_name=channel_username,
         message_date=message.date,
-        message_text=message.text,
+        message_text=str(message.message),
         message_pinned=message.pinned,
         message_fwd_from=bool(message.fwd_from),
         message_fwd_from_date=message.fwd_from.date if message.fwd_from else None,
         message_fwd_from_channel_id=message.fwd_from.from_id.channel_id
-        if message.fwd_from and message.fwd_from.from_id
-        else None,
+        if message.fwd_from and message.fwd_from.from_id else None,
         message_fwd_from_channel_username=fwd_from_channel_username,
         message_edit_date=message.edit_date if message.edit_date else None,
         message_views=message.views,

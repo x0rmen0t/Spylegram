@@ -38,7 +38,7 @@ async def init_telegram_client(
                 "Client is not authorized! Sending code request to telegram app."
             )
             await client.send_code_request(phone)
-            await client.sign_in(phone, input("Enter the code from the telegram app: "))
+            await client.sign_in(phone, input("Enter the code from the Telegram app: "))
             return client
     except Exception as e:
         logger.error(
@@ -80,7 +80,7 @@ async def create_and_save_channel_info(
         await db.save_channel_record(channel_information)
     except Exception as e:
         logger.error(
-            "Exception occured while obtaining and saving channel information", str(e)
+            "Exception %s occured while obtaining and saving channel information" % str(e)
         )
 
 
@@ -88,7 +88,7 @@ async def download_messages(
     client: TelegramClient, db: Database, channel: str, db_message_id=None, limit=None
 ) -> None:
     if db_message_id is None:
-        # Start downloading all messages from the beginning of the channel, limit
+        # Start downloading all messages from the beginning of the channel with hardcoded limit 1000
         iterator = client.iter_messages(channel, reverse=True, limit=1000)
     else:
         iterator = client.iter_messages(
@@ -149,7 +149,7 @@ async def check_and_save_photo(
                 channel_id, channel_username, message.id, photo_id, blob
             )
     except Exception as e:
-        logger.error("Error processing photo %s:", str(e))
+        logger.error("Error processing photo %s:" % str(e))
 
 
 async def process_and_save_message(
@@ -285,9 +285,8 @@ async def download_document(
                         )
                 except (FloodWaitError, ServerError, RPCError, BadRequestError) as e:
                     logger.error(
-                        "Error downloading document from message %s: %s",
-                        message.id,
-                        type(e).__name__,
+                        "Error downloading document from message %s: %s" %
+                        (message.id, type(e).__name__),
                         exc_info=True,
                     )
 
@@ -310,9 +309,7 @@ async def download_large_file(
 ) -> None:
     chunk_size = 256 * 1024
     offset = 0
-    total_chunks = (
-        message_size + chunk_size - 1
-    ) // chunk_size  # Calculate total chunks
+    total_chunks = (message_size + chunk_size - 1) // chunk_size  # Calculate total chunks
     chunks_downloaded = 0
 
     logger.info("Saving message with id [%s] to %s" % (message.id, local_file_path))
@@ -346,7 +343,7 @@ async def download_large_file(
 
             except (TimeoutError, ConnectionError) as e:
                 logger.exception(
-                    "Exception occurred while downloading large file. Sleeping.",
+                    "Exception %s occurred while downloading large file. Sleeping." %
                     type(e).__name__,
                 )
                 await asyncio.sleep(0.3)
@@ -389,7 +386,7 @@ async def download_large_media(client: TelegramClient, channel_name: str) -> Non
                 )
             except (Exception, AttributeError) as e:
                 logger.exception(
-                    "Exception occurred calling download_large_file func",
+                    "Exception %s occurred calling download_large_file func, in message" %
                     str(e),
                     message,
                 )

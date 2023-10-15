@@ -1,14 +1,23 @@
-FROM python:3.11-alpine
+FROM python:3.11-alpine as builder
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+COPY requirements.txt .
 RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
 
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+FROM python:3.11-alpine
+COPY --from=builder /opt/venv /opt/venv
 
-COPY . /app/
+WORKDIR /app
+
+ENV PATH="/opt/venv/bin:$PATH"
 
 CMD ["python", "main.py"]

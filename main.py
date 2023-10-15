@@ -43,9 +43,9 @@ async def main():
                 tg_channel_name
             )
             logger.info(
-                "Last message in db is %s, from channel > %s",
-                last_message_id_in_db,
-                from_channel,
+                "Last message in db is %s, from channel > %s" %
+                (last_message_id_in_db,
+                from_channel)
             )
 
             if last_message_id_in_db > 0:
@@ -54,10 +54,10 @@ async def main():
                     client, tg_channel_name
                 )
                 logger.info(
-                    "Last message_id %s in our db, last message id in channel %s channel %s",
-                    last_message_id_in_db,
-                    last_message_in_channel,
-                    tg_channel_name,
+                    "Last message_id %s in our db, last message id in channel %s channel %s" %
+                    (last_message_id_in_db,
+                     last_message_in_channel,
+                     tg_channel_name),
                 )
 
                 if last_message_id_in_db < last_message_in_channel:
@@ -67,7 +67,7 @@ async def main():
 
             if last_message_id_in_db == 0:
                 # we don't have messages yet, download all of them
-                logger.info("Downloading all messages for channel %s", tg_channel_name)
+                logger.info("Downloading all messages for channel %s" % tg_channel_name)
                 await download_messages(client, db, tg_channel_name, db_message_id=None)
 
             await download_document(client, db, channel_entity.id, tg_channel_name)
@@ -79,7 +79,7 @@ async def main():
     except KeyboardInterrupt:
         pass
     except Exception as e:
-        logger.error("An error occurred", str(e))
+        logger.error("An error %s occurred" % str(e))
         pass
 
 

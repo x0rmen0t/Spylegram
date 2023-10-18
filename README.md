@@ -24,21 +24,23 @@ After successfully obtaining API ID and hash:
 
 - Clone the repository to your local machine.
 - Install the necessary dependencies.
-- Configure the <.env file> of your script with your Telegram API credentials ( API ID, hash, token, and your phone number)
+- Configure the <.env file> of your script with your Telegram API credentials ( API ID, hash, token, and your phone number).
+- The `.env` file keys are: `API_ID`, `API_HASH`, `PHONE`, `SESSION_NAME`
 - Customize scraping settings to target the channels and groups you're interested in by updating <telegrram_channels.yaml>.
+- Run the `create_session.py` standalone script to obtain the .session file.
 - Run the script to start scraping Telegram hacktivist channels. 
 
 ❗Please note that this script should be used responsibly and in compliance with Telegram's terms of service and community guidelines.
 
 
 ## Run In Docker
-- First, run the create_session.py script with: python create_session.py which will prompt you to provide authorisation code which will be sent to your Telegram app.
-    Once successfully authorised, the `snoooper.session` file will be created in project root directory. This is the file which will be reused iside the docker container.
-- Bulid docker image with
+- First, run the `create_session.py` script with: `python create_session.py` which will prompt you to provide an authorisation code which will be sent to your Telegram app.
+- Once successfully authorised, the `snoooper.session` file will be created in the project root directory. This is the file which will be reused inside the docker container.
+- Build the docker image with
     ```console
     $ docker build -t <name-of-the-docker-image> .
     ```
-- Run your docker image with credentials saved in .env file as:
+- Run your docker image with credentials saved in `.env` file as:
     ``` console
     $ docker run  -e API_ID=<your-api> \
                    -e API_HASH=<your-hash> \

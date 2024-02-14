@@ -12,7 +12,7 @@ This Python script empowers you to explore and scrape Telegram's vast universe o
 
 - **Customizable Scraping**: Configure the script to scrape specific channels or groups, target particular message types, and set scraping intervals.
 
-# How To Use:
+# How To Use
 Before working with Telegram’s API, you need to **get your own API ID and hash**. To get API ID and hash follow the steps below:
 
 - [Login](https://my.telegram.org/auth) to your Telegram account with the phone number of the developer account to use.
@@ -55,8 +55,7 @@ After successfully obtaining API ID and hash:
 
 ## Feedback/Contact
 
-Found a bug or have feedback? Please create an issue on  [issue tracker][bugs].If you'd like to share your thoughts, join
-[mailing list][ml] hosted on Google Groups. If you have ideas for improvements, don't hesitate to submit a pull request! 
+Did you find a bug or have feedback? Please create an issue on  [issue tracker][bugs]. Don't hesitate to submit a pull request if you have ideas for improvements! 
 
 [bugs]: https://github.com/x0rmen0t/Spylegram/issues
 [ml]: https://groups.google.com/u/4/g/spylegram

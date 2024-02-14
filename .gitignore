@@ -4,6 +4,10 @@
 ### Telegram session file###
 /snooper.session
 
+### Data folders
+data/
+data/downloads/
+
 ### Linux ###
 *~
 
@@ -154,7 +158,6 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-downloads/
 eggs/
 .eggs/
 lib/

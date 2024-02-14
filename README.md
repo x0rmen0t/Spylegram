@@ -6,25 +6,30 @@ This Python script empowers you to explore and scrape Telegram's vast universe o
 ## Features
 - **Channel Scraping**: Retrieve messages, photos, and documents from Telegram hacktivist channels.
 
-- **Data Organization**: Automatically organize and save scraped data into sqlite database for easy analysis and reference.
+- **Data Organization**: Automatically organize and save scraped data into SQLite database for easy analysis and reference.
 
 - **Real-time Updates**: Keep up to date with the latest content by periodically scraping channels and groups of interest.
 
 - **Customizable Scraping**: Configure the script to scrape specific channels or groups, target particular message types, and set scraping intervals.
 
 # How To Use
-Before working with Telegram’s API, you need to **get your own API ID and hash**. To get API ID and hash follow the steps below:
+
+## Set up Telegram API Access
+Before working with Telegram’s API, you need to **get your own API ID and hash**. To get the API ID and hash, follow the steps below:
 
 - [Login](https://my.telegram.org/auth) to your Telegram account with the phone number of the developer account to use.
-- Click under API Development tools.
-- A Create new application window will appear. Fill in your application details. There is no need to enter any URL, and only the first two fields (App title and Short name) can currently be changed later.
-- Click on Create application at the end. Remember that your API hash is secret and Telegram won’t let you revoke it. Don’t post it anywhere!
+- Click under API Development tools and a "Create new application" window will appear.
+- Fill in your application details, including: app title (can be updated later), short name (can be updated later), platform, URL (optional), and description.
+- Click on Create application at the end.
+- **Remember**: the API hash is secret, and Telegram won’t let you revoke it. Don’t post it anywhere!
 
-After successfully obtaining API ID and hash:
+## Set up Spylegram
+
+After successfully obtaining the Telegram API ID and hash:
 
 - Clone the repository to your local machine.
-- Install the necessary dependencies.
-- Configure the <.env file> of your script with your Telegram API credentials ( API ID, hash, token, and your phone number).
+- Install the requirements: `python3 -m pip install -r requirements.txt`
+- Configure the `.env` file with your Telegram API credentials ( API ID, hash, token, and your phone number).
 - The `.env` file keys are: `API_ID`, `API_HASH`, `PHONE`, `SESSION_NAME`
 - Customize scraping settings to target the channels and groups you're interested in by updating <telegrram_channels.yaml>.
 - Run the `create_session.py` standalone script to obtain the .session file.

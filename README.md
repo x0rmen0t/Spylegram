@@ -29,10 +29,11 @@ After successfully obtaining the Telegram API ID and hash:
 
 - Clone the repository to your local machine.
 - Install the requirements: `python3 -m pip install -r requirements.txt`
-- Configure the `.env` file with your Telegram API credentials ( API ID, hash, token, and your phone number).
-- The `.env` file keys are: `API_ID`, `API_HASH`, `PHONE`, `SESSION_NAME`
-- Customize scraping settings to target the channels and groups you're interested in by updating <telegrram_channels.yaml>.
-- Run the `create_session.py` standalone script to obtain the .session file.
+- Configure the `.env` file with your Telegram API credentials:
+    - `cp env_EXAMPLE .env`
+    - Edit the `.env` file to add the API ID, hash, token, and your phone number.
+- Customize the channels and/or groups to scrap by updating `telegram_channels.yaml`.
+- Run the `create_session.py` standalone script to obtain the `.session` file.
 - Run the script to start scraping Telegram hacktivist channels. 
 
 ❗Please note that this script should be used responsibly and in compliance with Telegram's terms of service and community guidelines.

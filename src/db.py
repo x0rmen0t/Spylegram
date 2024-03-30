@@ -10,16 +10,18 @@ from src.message import MessageData
 class Database:
     def __init__(self, db_name: str) -> None:
         self.db_name = db_name
+        self._connection = None
 
     @asynccontextmanager
     async def db_cursor(self):
-        async with aiosqlite.connect(self.db_name) as con:
-            cursor = await con.cursor()
+        if self._connection is None:
+            self._connection = await aiosqlite.connect(self.db_name, timeout=5, isolation_level='EXCLUSIVE')
+        async with self._connection.cursor() as cursor:
             try:
                 yield cursor
-                await con.commit()
+                await self._connection.commit()
             except Exception:
-                await con.rollback()
+                await self._connection.rollback()
                 raise
 
     async def create_schema(self) -> None:
@@ -55,13 +57,13 @@ class Database:
                 )
 
     async def insert_document_blob(
-        self,
-        message_id: int,
-        channel_id: int,
-        channel_username: str,
-        file_name,
-        mime_type,
-        file_blob: bytes,
+            self,
+            message_id: int,
+            channel_id: int,
+            channel_username: str,
+            file_name,
+            mime_type,
+            file_blob: bytes,
     ) -> None:
         async with self.db_cursor() as cursor:
             await cursor.execute(
@@ -93,7 +95,7 @@ class Database:
                 return 0, ""
 
     async def update_last_processed_message_id(
-        self, channel_name: str, message_id: int
+            self, channel_name: str, message_id: int
     ) -> None:
         async with self.db_cursor() as cursor:
             await cursor.execute(
@@ -142,12 +144,12 @@ class Database:
             return (await result.fetchone()) is not None
 
     async def save_image_blob(
-        self,
-        channel_id: int,
-        channel_username: str,
-        message_id: int,
-        photo_id: int,
-        image_data: bytes,
+            self,
+            channel_id: int,
+            channel_username: str,
+            message_id: int,
+            photo_id: int,
+            image_data: bytes,
     ):
         async with self.db_cursor() as cursor:
             await cursor.execute(
@@ -156,12 +158,12 @@ class Database:
             )
 
     async def save_reactions(
-        self,
-        message_id: int,
-        channel_id: int,
-        channel_username: str,
-        emoticon,
-        count: int,
+            self,
+            message_id: int,
+            channel_id: int,
+            channel_username: str,
+            emoticon,
+            count: int,
     ):
         async with self.db_cursor() as cursor:
             # Check if the reaction already exists in the database
@@ -178,3 +180,10 @@ class Database:
                     "?, ?, ?, ?, ?)",
                     (message_id, channel_id, channel_username, emoticon, count),
                 )
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        if self._connection is not None:
+            await self._connection.close()

@@ -256,7 +256,7 @@ async def download_document(
     total_documents_in_channel = await client.get_messages(
         channel_username, 0, filter=InputMessagesFilterDocument
     )
-    dir_name = f"{channel_username}_downloads"
+    dir_name = f"data/downloads/{channel_username}"
     processed_messages = set()
 
     with tqdm(total=total_documents_in_channel.total, unit=" documents") as pbar_total:

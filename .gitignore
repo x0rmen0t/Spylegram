@@ -357,3 +357,5 @@ $RECYCLE.BIN/
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm+all,venv,virtualenv,macos,windows,linux
+/*.session-journal
+/*.session

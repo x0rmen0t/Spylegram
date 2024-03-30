@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Optional, Tuple, Union
@@ -9,9 +8,10 @@ from telethon.tl.types import (Message, MessageEntityTextUrl,
                                MessageEntityUnknown, MessageEntityUrl,
                                MessageService, PeerChannel)
 
-logging.basicConfig(
-    format="[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s", level=logging.INFO
-)
+from src.logging_config import get_logger
+
+
+message_module = get_logger("message")
 
 TypeMessageEntity = Union[MessageEntityUnknown, MessageEntityUrl]
 
@@ -40,7 +40,7 @@ async def get_first_message_date(
     client: TelegramClient, channel_url: str
 ) -> Union[datetime, str]:
     """We count channel creation date by the 1st service message posted in the channel;
-    If None then we take creation date from channel entity
+       If None then we take creation date from channel entity
     """
     async for message in client.iter_messages(channel_url, reverse=True, limit=1):
         if isinstance(message, MessageService):
@@ -66,14 +66,15 @@ def get_telegram_link(fwd_channel_username: str) -> str:
     return f"https://t.me/{fwd_channel_username}"
 
 
-async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Tuple[str, str] | Tuple[None, None]:  # type: ignore
+async def get_fwd_channel_username(client: TelegramClient, message: Message) -> Union[
+    Tuple[str, str], Tuple[None, None]]:  # type: ignore
     if isinstance(message.fwd_from.from_id, PeerChannel):
         try:
             entity = await client.get_entity(message.fwd_from.from_id.channel_id)
             tg_link = get_telegram_link(entity.username)
             return entity.username, tg_link
         except ChannelPrivateError as e:
-            logging.warning(
+            message_module.warning(
                 "Cant get information about the channel due to access restrictions. Channel might be marked as private",
                 e,
             )
@@ -99,7 +100,7 @@ def create_message_data(
         fwd_from_channel_username (str): The username of the forwarded channel (if any).
         tg_link (str): The link to the forwarded channel (if any).
 
-    Returns:
+    Return:
         MessageData: A MessageData object representing the message.
     """
     return MessageData(

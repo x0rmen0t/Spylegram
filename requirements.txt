@@ -5,14 +5,13 @@ python-dotenv
 PyYAML
 rsa==4.9
 Telethon
-tqdm
 pytest
 pytest-asyncio==0.21.1
 pytest-mock==3.11.1
-black
 requests
 databases[postgresql]
 asyncpg
 pydantic
 pytest-asyncio
 langdetect
+

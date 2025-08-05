@@ -173,7 +173,3 @@ async def saving_data_to_db(
         for result in tasks:
             if isinstance(result, Exception):
                 app_logger.error("Error during saving task: %s", str(result))
-
-    except Exception as e:
-        app_logger.error("Critical failure in saving_data_to_db: %s", str(e))
-        raise

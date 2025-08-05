@@ -5,20 +5,21 @@ from typing import Union, List
 from telethon import TelegramClient, hints
 
 from src.logging_config import get_logger
-from src.utils import get_subscribers_count, clean_subscribers_count
+from src.utils import get_subscribers_count
 
 channel_logger = get_logger("channel")
 
 ChannelData = namedtuple(
     "ChannelData",
     [
-        "id",
+        "original_channel_id",
         "channel_url",
         "title",
         "username",
         "participants_count",
         "date",
         "scam",
+        "verified",
         "has_link",
         "fake",
     ],
@@ -61,24 +62,19 @@ async def get_channel_username(
             "Error occurred when trying to retrieve username by channel id %s %s"
             % (channel_id, type(e).__name__)
         )
-        return
+        return None
 
 
-def get_channel_info_rows(
-        channel_url: str, creation_date: datetime, channel_entity: hints.EntityLike
-) -> List[ChannelData]:
-    rows = []
-    subscribers_count = get_subscribers_count(channel_url)
-    channel_data = ChannelData(
-        id=channel_entity.id,
+def get_channel_info_rows(channel_url: str, creation_date: datetime.datetime, entity) -> List[ChannelData]:
+    return [ChannelData(
+        original_channel_id=entity.id,
         channel_url=channel_url,
-        title=channel_entity.title,
-        username=channel_entity.username,
-        participants_count=clean_subscribers_count(subscribers_count) if subscribers_count else 0,
-        date=creation_date if creation_date else "unknown",
-        scam=channel_entity.scam,
-        has_link=channel_entity.has_link,
-        fake=channel_entity.fake,
-    )
-    rows.append(channel_data)
-    return rows
+        username=entity.username,
+        title=entity.title,
+        participants_count=get_subscribers_count(channel_url),
+        date=creation_date,
+        scam=getattr(entity, "scam", False),
+        verified=getattr(entity, "verified", False),
+        has_link=bool(entity.username),
+        fake=getattr(entity, "fake", False)
+    )]

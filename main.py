@@ -1,108 +1,118 @@
 import argparse
 import asyncio
 import os
-from typing import List
-from dotenv import load_dotenv
+from typing import Optional, List
 import yaml
+from dotenv import load_dotenv
 
-from src.app import (download_document,
-                     download_messages, init_telegram_client, process_channel, validate_channel)
-from src.db import Database
+from src.app import download_messages, init_telegram_client, process_channel, validate_channel
+from src.db import DatabaseManager
 from src.logging_config import get_logger
 from src.message import get_last_message_id
 
-load_dotenv()
 main_logger = get_logger("main")
-
 load_dotenv()
+
+db = DatabaseManager()
 
 
 def get_user_arg():
     parser = argparse.ArgumentParser(
         prog='Spylegram',
         description='Downloads messages from Telegram Channels')
-    parser.add_argument('-c','--channel', help='Enter the name of Telegram channel url for processing', type=str, action='store',
-                        required=False)
-    parser.add_argument('-p', '--path_to_yml', help='Enter path to the YAML file with Telegram channels',
-                        type=str, action='store', required=False)
-    args = parser.parse_args()
-    return args
+    parser.add_argument('-c', '--channel', type=str,
+                        help='Telegram channel URL or username')
+    parser.add_argument('-p', '--path_to_yml', type=str,
+                        help='Path to YAML file with Telegram channels')
+    return parser.parse_args()
 
 
-def get_channels(yml_file: str) -> List[str]:
+def get_channels(yml_file: str) -> Optional[List[str]]:
     try:
-        with open(yml_file, "r") as file:
+        with open(yml_file, "r", encoding="utf-8") as file:
             yaml_data = yaml.safe_load(file)
-            if "channels" in yaml_data:
-                return yaml_data["channels"]
-            else:
-                return yaml_data
-            # return yaml.safe_load(file)["channels"]
-    except yaml.YAMLError as e:
-        main_logger.error("Error while reading yml file:\t%s" % type(e).__name__)
+            return yaml_data.get("channels") if isinstance(yaml_data, dict) else None
+    except Exception as e:
+        main_logger.error("Error reading YAML file: %s", str(e))
+        return None
 
 
 async def main():
-    # Initialize Telegram client and database
     client = await init_telegram_client(
-        os.getenv("TG_SESSION_NAME"), os.getenv("PHONE"), int(os.getenv("API_ID")), os.getenv("API_HASH")
+        os.getenv("TG_SESSION_NAME"),
+        os.getenv("PHONE"),
+        int(os.getenv("API_ID")),
+        os.getenv("API_HASH")
     )
     main_logger.info("Telegram client initialized")
-    db = Database(os.getenv("DB_NAME"))
-    await db.create_schema()
-    main_logger.info("Connection to database created")
-    user_args = get_user_arg()
-    if user_args.channel:
-        channel_list = [get_channels("telegram_channels.yml")]
-    elif user_args.path_to_yml:
-        channel_list = get_channels(user_args.path_to_yml)
-    else:
-        channel_list = get_channels("telegram_channels.yml")
 
-    # channel_list = get_channels("telegram_channels.yml")
+    await db.connect()
+    main_logger.info("Connected to the database")
+
+    args = get_user_arg()
+    if args.channel:
+        channel_list = [args.channel]
+    else:
+        yaml_path = args.path_to_yml or "telegram_channels.yml"
+        channel_list = get_channels(yaml_path)
+        if not channel_list:
+            main_logger.error("No channels found in YAML file: %s", yaml_path)
+            return
+
     for channel in channel_list:
         try:
+            main_logger.info("Validating channel: %s", channel)
             validated_channel_entity = await validate_channel(client, channel)
             if validated_channel_entity is None:
+                main_logger.warning("Channel validation failed: %s", channel)
                 continue
 
-            # Process the validated channel
             tg_channel_name = validated_channel_entity.username
-            main_logger.info("Processing channel %s information" % tg_channel_name)
+            if not tg_channel_name:
+                main_logger.warning("Channel has no username, skipping: %s", channel)
+                continue
+
+            original_channel_id = validated_channel_entity.id
+            main_logger.info("Processing channel: %s (%s)", tg_channel_name, original_channel_id)
             await process_channel(client, channel, validated_channel_entity, db)
 
-            last_message_id_in_db, from_channel = await db.get_last_message_record(tg_channel_name)
-            main_logger.info(
-                "Last message in db is number %s, from channel ---> %s" % (last_message_id_in_db, from_channel))
+            last_message_id_in_db = await db.get_last_processed_message_id(original_channel_id)
 
-            if last_message_id_in_db > 0:
-                # check if we have any messages in db.
+            # Resolve proper entity for iter_messages()
+            resolved_entity = await client.get_entity(validated_channel_entity)
+
+            if last_message_id_in_db is None or last_message_id_in_db == 0:
+                main_logger.info("Downloading all messages for new channel: %s", tg_channel_name)
+                await download_messages(client, db, resolved_entity, db_message_id=None)
+            else:
                 last_message_in_channel = await get_last_message_id(client, tg_channel_name)
-                main_logger.info("Last message_id %s in our db, last message id in channel %s channel %s" %
-                                 (last_message_id_in_db, last_message_in_channel, tg_channel_name))
+                if last_message_in_channel is None:
+                    main_logger.warning("Could not fetch last message ID from Telegram for %s", tg_channel_name)
+                    continue
+
+                main_logger.info("DB last_message_id: %s | Channel last_message_id: %s",
+                                 last_message_id_in_db, last_message_in_channel)
 
                 if last_message_id_in_db < last_message_in_channel:
-                    await download_messages(client, db, tg_channel_name, db_message_id=last_message_id_in_db)
+                    main_logger.info("Downloading missing messages from ID %s for %s",
+                                     last_message_id_in_db, tg_channel_name)
+                    await download_messages(client, db, resolved_entity, db_message_id=last_message_id_in_db)
+                else:
+                    main_logger.info("Channel %s is up to date", tg_channel_name)
 
-            if last_message_id_in_db == 0:
-                # we don't have messages yet, download all of them
-                main_logger.info("Downloading all messages for channel %s" % tg_channel_name)
-                await download_messages(client, db, tg_channel_name, db_message_id=None)
-
-            await download_document(client, db, validated_channel_entity.id, tg_channel_name)
         except asyncio.CancelledError:
             pass
         except ValueError as e:
-            main_logger.error("Cannot find any entity corresponding to channel %s" % e)
+            main_logger.error("Invalid channel entity: %s", e)
         except Exception as e:
-            main_logger.error(f"An error occurred in the main loop: {str(e)}")
+            main_logger.error("Unexpected error: %s", str(e))
 
-    try:
-        await client.disconnect()
-        main_logger.info("Disconnected from Telegram.")
-    except Exception as e:
-        main_logger.error(f"Error during disconnect: {str(e)}")
+
+    await client.disconnect()
+    await db.disconnect()
+    main_logger.info("Disconnected cleanly.")
+
 
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+    asyncio.run(main())

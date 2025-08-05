@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: tg_test_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: darkdb
+      POSTGRES_USER: darkuser
+      POSTGRES_PASSWORD: darkpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+volumes:
+  pgdata:

@@ -1,6 +1,6 @@
 aiosqlite
 pyaes==1.6.1
-pyasn1==0.5.0
+pyasn1==0.6.3
 python-dotenv
 PyYAML
 rsa==4.9
